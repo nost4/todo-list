@@ -1,0 +1,23 @@
+title {label: "ToDo Entity-Relationship diagram", size: "20"}
+
+# Entities
+
+[user] {bgcolor: "#fcecec"}
+  *id {label: "int, not null"}
+  name {label: "varchar, null"}
+
+[task] {bgcolor: "#ececfc"}
+  *id {label: "int, not null"}
+  title {label: "varchar, not null"}
+  content {label: "varchar, null"}
+  deadline_at {label: "utctime, null"}
+  created_at {label: "utctime, not null"}
+  completed_at {label: "utctime, null"}
+
+[user_task] {bgcolor: "#d0e0d0"}
+  *+user_id {label: "int, not null" }
+  *+task_id {label: "int, not null" }
+
+# Relationships
+user        1--* user_task
+task        1--* user_task
