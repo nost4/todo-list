@@ -1,0 +1,121 @@
+#%RAML 1.0
+title: ToDo List API
+version: 1
+baseUri: http://localhost:9000
+mediaType: application/json
+types:
+  RecordId:
+    type: integer
+
+  Record-base:
+    type: object
+    properties:
+      id:
+        type: RecordId
+        required: true
+
+  User-base:
+    type: object
+    properties:
+      name: string
+
+  User-new:
+    type: User-base
+
+  User-update:
+    type: User-base
+
+  User:
+    type: [User-base, Record-base]
+
+  Task-base:
+    type: object
+    properties:
+      project_id: integer
+      title: string
+      content: string
+      deadline_at: datetime-only
+      created_at: datetime-only
+      completed_at: datetime-only
+
+  Task-new:
+    type: Task-base
+
+  Task-update:
+    type: Task-base
+
+  Task:
+    type: [Task-base, Record-base]
+
+/users:
+  description: すべてのユーザについての操作
+  get:
+    description: ユーザ一覧を取得する
+    responses:
+      200:
+        body:
+          properties:
+            total: integer
+            users: [User]
+  post:
+    description: 新規ユーザを作成する
+    body: User-new
+    responses:
+      201:
+        body: User
+
+  /{userId}:
+    description: 任意のユーザについての操作
+    uriParameters:
+      userId: RecordId
+    get:
+      description: ユーザの情報を取得する
+      responses:
+       200:
+        body: User
+    patch:
+      description: ユーザの情報を更新する
+      body: User-update
+      responses:
+        200:
+          body: User
+
+    /tasks:
+      description: すべてのタスクについての操作
+      get:
+        description: すべてのタスクを取得する
+        responses:
+          200:
+            body:
+              properties:
+                total: integer
+                tasks: [Task]
+      post:
+        description: 新規タスクを作成する
+        body: Task-new
+        responses:
+          201:
+            body: Task
+
+      /{taskId}:
+        description: 任意のタスクについての操作
+        uriParameters:
+          taskId:
+            type: RecordId
+        get:
+          description: タスクの情報を取得する
+          responses:
+            200:
+              body: Task
+        patch:
+          description: タスクを更新する
+          body: Task-update
+          responses:
+            200:
+              body: Task
+        delete:
+          description: タスクを削除する
+          responses:
+            204:
+
+
