@@ -16,4 +16,9 @@ class InMemoryTaskRepository extends InMemoryEntityRepository[Task] with TaskRep
       .filter { case (id: TaskId, _: Task) => taskIds.contains(id) }
       .values.toList
   }
+
+  /** ${inheritDoc} */
+  override def delete(taskId: TaskId): Unit = {
+
+  }
 }

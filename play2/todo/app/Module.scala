@@ -1,8 +1,8 @@
 import com.google.inject.AbstractModule
 import java.time.Clock
 
-import infrastructures.inmemory.InMemoryUserRepository
-import models.UserRepository
+import infrastructures.inmemory.{InMemoryTaskRepository, InMemoryUserRepository, InMemoryUserTaskRepository}
+import models.{TaskRepository, UserRepository, UserTaskRepository}
 import services._
 
 /**
@@ -26,8 +26,14 @@ class Module extends AbstractModule {
     // Set AtomicCounter as the implementation for Counter.
     bind(classOf[Counter]).to(classOf[AtomicCounter])
 
+    // ユーザ関連の依存
     bind(classOf[UserRepository]).toInstance(new InMemoryUserRepository())
     bind(classOf[UserServiceFactory]).toInstance(new UserServiceFactoryImpl())
-  }
 
+    // タスク・ユーザタスク関連の依存
+    bind(classOf[TaskRepository]).toInstance(new InMemoryTaskRepository())
+    bind(classOf[UserTaskRepository]).toInstance(new InMemoryUserTaskRepository())
+    bind(classOf[UserTaskServiceFactory]).toInstance(new UserTaskServiceFactoryImpl())
+  }
 }
+

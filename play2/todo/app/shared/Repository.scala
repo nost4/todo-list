@@ -24,6 +24,12 @@ trait Repository[K, V] {
     * @param value 値
     */
   def store(key: Key, value: Value): Unit
+
+  /**
+    * 指定したキーの値を削除する
+    * @param key キー
+    */
+  def remove(key: Key): Unit
 }
 
 

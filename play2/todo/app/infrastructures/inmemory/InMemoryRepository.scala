@@ -26,6 +26,9 @@ class InMemoryRepository[K, V] extends Repository[K, V] {
 
   /** ${inheritDoc} */
   override def store(key: Key, value: Value): Unit = _entries.put(key, value)
+
+  /** ${inheritDoc} */
+  override def remove(key: Key): Unit = _entries.remove(key)
 }
 
 
@@ -72,4 +75,7 @@ abstract class InMemoryEntityRepository[E <: Entity] extends EntityRepository[E]
       _repository.store(id, entity)
     }
   }
+
+  /** ${inheritDoc} */
+  override def remove(key: Key): Unit = _repository.remove(key)
 }
