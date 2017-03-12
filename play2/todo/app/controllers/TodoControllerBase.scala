@@ -7,8 +7,8 @@ import play.api.mvc.{AnyContent, Controller, Request, Result}
 
 
 abstract class TodoControllerBase(userRepository: UserRepository) extends Controller {
-  private implicit val jsonParseExceptionWrites = Json.writes[JsonParseException]
-  private implicit val resourceNotFoundExceptionWrites = Json.writes[ResourceNotFoundException]
+  protected implicit val jsonParseExceptionWrites = Json.writes[JsonParseException]
+  protected implicit val resourceNotFoundExceptionWrites = Json.writes[ResourceNotFoundException]
 
   protected def jsonAction[TRequest](request: Request[AnyContent], reads: Reads[TRequest])(action: TRequest => Result): Result = {
     request.body.asJson.map { json =>
