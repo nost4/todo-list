@@ -3,7 +3,6 @@ package infrastructures.inmemory
 import java.util.concurrent.ConcurrentHashMap
 
 import scala.collection.convert.decorateAsScala._
-
 import shared.{Entity, EntityRepository, Repository}
 
 
@@ -46,9 +45,31 @@ abstract class InMemoryEntityRepository[E <: Entity] extends EntityRepository[E]
     */
   protected def entities: Map[E#ID, E] = _repository.entries
 
+  /**
+    * 新規インスタンスを作成する
+    * @param f エンティティ作成関数
+    * @return エンティティ
+    */
+  protected def createNew(f: Int => E): E = {
+    _repository.synchronized {
+      val idHint = _repository.entries.size + 1
+      val entity = f(idHint)
+      _repository.store(entity.id, entity)
+
+      entity
+    }
+  }
+
   /** ${inheritDoc} */
   override def find(id: E#ID): Option[E] = _repository.find(id)
 
   /** ${inheritDoc} */
-  override def store(id: E#ID, entity: E): Unit = _repository.store(id, entity)
+  override def store(id: E#ID, entity: E): Unit = {
+    _repository.synchronized {
+      if (!_repository.entries.contains(id)) {
+        throw new IllegalStateException("cannot store new entity")
+      }
+      _repository.store(id, entity)
+    }
+  }
 }

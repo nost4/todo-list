@@ -8,11 +8,11 @@ import shared.EntityRepository
   */
 trait TaskRepository extends EntityRepository[Task] {
   /**
-    * 次の識別子を割り当てる
-    *
-    * @return 次の識別子
+    * 新規タスクを作成する
+    * @param task タスク(仮)
+    * @return タスク(確定)
     */
-  override def nextIdentity(): TaskId = TaskId(generateUUID().toString)
+  def create(task: Task): Task
 
   /**
     *  指定したIDと一致するタスクを取得する

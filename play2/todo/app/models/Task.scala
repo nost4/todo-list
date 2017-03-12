@@ -9,7 +9,7 @@ import shared.Entity
   *
   * @param value 識別子の値
   */
-case class TaskId(value: String)
+case class TaskId(value: Int)
 
 
 /**

@@ -26,12 +26,11 @@ class UserTaskServiceImpl(taskRepository: TaskRepository, userTaskRepository: Us
 
   /** ${inheritDoc} */
   override def createNewTask(user: User, task: Task): UserTask = {
-    val userTask = UserTaskImpl(user, task)
-
     // タスクを追加する
-    taskRepository.store(task)
+    val actualTask = taskRepository.create(task)
 
     // 関連のリポジトリに保存する
+    val userTask = UserTaskImpl(user, actualTask)
     userTaskRepository.store(userTask)
 
     // 関連を返す

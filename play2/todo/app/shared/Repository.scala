@@ -37,12 +37,6 @@ trait Repository[K, V] {
 abstract class EntityRepository[E<: Entity] extends Repository[E#ID, E] {
 
   /**
-    * 次の識別子を割り当てる
-    * @return 次の識別子
-    */
-  def nextIdentity(): E#ID
-
-  /**
     * エンティティを保存する
     * @param entity エンティティ
     */

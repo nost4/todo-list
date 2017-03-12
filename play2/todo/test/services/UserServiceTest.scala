@@ -9,8 +9,8 @@ class UserServiceTest extends PlaySpec {
   "UserService#createUser" should {
     "create new user" in {
       val repository = new InMemoryUserRepository()
-      val taro = User(UserId("1"), "Taro")
-      repository.store(taro)
+      val taro = User(UserId(1), "Taro")
+      repository.create(taro)
 
       val service = new UserServiceImpl(userRepository = repository)
       val jiro = service.createUser("Jiro")

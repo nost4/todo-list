@@ -9,15 +9,15 @@ import shared.EntityRepository
 trait UserRepository extends EntityRepository[User] {
 
   /**
-    * 次の識別子を割り当てる
-    *
-    * @return 次の識別子
+    * 新規ユーザを作成する
+    * @param user ユーザ(仮)
+    * @return ユーザ(確定)
     */
-  override def nextIdentity(): UserId = UserId(generateUUID().toString)
+  def create(user: User): User
 
   /**
     * すべてのユーザを検索する
- *
+    *
     * @return すべてのユーザ
     */
   def findAll(): List[User]

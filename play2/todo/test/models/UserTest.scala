@@ -8,10 +8,10 @@ class UserTest extends PlaySpec with MockitoSugar {
 
   "User#rename" should {
     "has same user id" in {
-      val srcUser = User(UserId("1"), "Taro")
+      val srcUser = User(UserId(1), "Taro")
       val renamedUser = srcUser.rename("Jiro")
 
-      srcUser.id mustBe UserId("1")
+      srcUser.id mustBe UserId(1)
       renamedUser.id mustBe srcUser.id
     }
 
