@@ -2,21 +2,36 @@ package shared
 
 
 /**
+  * リポジトリ
+  * @tparam K キー値の型
+  * @tparam V 値の型
+  */
+trait Repository[K, V] {
+  /**
+    * 指定したキーの値を検索する
+    * @param key キー
+    * @return 値
+    */
+  def find(key: K): Option[V]
+
+  /**
+    * 指定したキーで値を保存する
+    * @param key キー
+    * @param value 値
+    */
+  def store(key: K, value: V): Unit
+}
+
+
+/**
   * エンティティのリポジトリ
  *
   * @tparam E エンティティの型
   */
-trait Repository[E<: Entity] {
-  /**
-    * エンティティを検索する
-    * @param id エンティティの識別子
-    * @return エンティティ、未登録の場合はNone
-    */
-  def find(id: E#ID): Option[E]
-
+abstract class EntityRepository[E<: Entity] extends Repository[E#ID, E] {
   /**
     * エンティティを保存する
     * @param entity エンティティ
     */
-  def store(entity: E): Unit
+  def store(entity: E): Unit = store(entity.id, entity)
 }

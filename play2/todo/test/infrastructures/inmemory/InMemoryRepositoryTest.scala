@@ -7,7 +7,7 @@ class InMemoryRepositoryTest extends PlaySpec {
   // 確認用のダミーエンティティとリポジトリ
   case class PersonId(value: Int)
   case class Person(id: PersonId, name: String) extends Entity { type ID = PersonId }
-  class InMemoryPersonRepository extends InMemoryRepository[Person] {
+  class InMemoryPersonRepository extends InMemoryEntityRepository[Person] {
   }
 
   "InMemoryRepositoryTest#find" should {

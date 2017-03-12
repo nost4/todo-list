@@ -5,7 +5,7 @@ import models.{Task, TaskId, TaskRepository}
 /**
   * タスクリポジトリのインメモリ実装
   */
-class InMemoryTaskRepository extends InMemoryRepository[Task] with TaskRepository {
+class InMemoryTaskRepository extends InMemoryEntityRepository[Task] with TaskRepository {
   /** ${inheritDoc} */
   override def find(taskIds: Seq[TaskId]): List[Task] = {
     entities

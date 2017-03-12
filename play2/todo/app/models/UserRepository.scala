@@ -1,12 +1,12 @@
 package models
 
-import shared.Repository
+import shared.EntityRepository
 
 
 /**
   * ユーザエンティティのリポジトリ
   */
-trait UserRepository extends Repository[User] {
+trait UserRepository extends EntityRepository[User] {
   /**
     * すべてのユーザを検索する
     * @return すべてのユーザ

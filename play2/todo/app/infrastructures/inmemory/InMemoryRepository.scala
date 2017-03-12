@@ -1,27 +1,52 @@
 package infrastructures.inmemory
 
-import shared.{Entity, Repository}
+import shared.{Entity, EntityRepository, Repository}
 
 import scala.collection.mutable
 
 
 /**
   * (動作確認用) インメモリリポジトリの基底クラス
-  * @tparam E エンティティの型
+  * @tparam K キー値の型
+  * @tparam V 値の型
   */
-abstract class InMemoryRepository[E <: Entity] extends Repository[E] {
+class InMemoryRepository[K, V] extends Repository[K, V] {
   /** エンティティのマップ、エンティティの識別子をキーとして管理 */
-  private[this] val _entities = mutable.HashMap.empty[E#ID, E]
+  private[this] val _entries = mutable.HashMap.empty[K, V]
 
   /**
     * エンティティのマップを取得する、 _entitiesの直更新を避けるためimmutable化
     * @return エンティティのマップ
     */
-  protected def entities: Map[E#ID, E] = _entities.toMap
+  def entries: Map[K, V] = _entries.toMap
 
   /** ${inheritDoc} */
-  override def find(id: E#ID): Option[E] = _entities.find(_._1 == id).map(_._2)
+  override def find(key: K): Option[V] = _entries.find(_._1 == key).map(_._2)
 
   /** ${inheritDoc} */
-  override def store(entity: E): Unit = _entities.put(entity.id, entity)
+  override def store(key: K, value: V): Unit = _entries.put(key, value)
+}
+
+
+/**
+  * (動作確認用) インメモリのエンティティリポジトリ基底クラス
+  * @tparam E エンティティの型
+  */
+abstract class InMemoryEntityRepository[E <: Entity] extends EntityRepository[E] {
+  /**
+    * リポジトリ、実際の管理は汎用リポジトリに委譲する
+    */
+  private[this] val _repository = new InMemoryRepository[E#ID, E]()
+
+  /**
+    * エンティティのマップを取得する、 _entitiesの直更新を避けるためimmutable化
+    * @return エンティティのマップ
+    */
+  protected def entities: Map[E#ID, E] = _repository.entries
+
+  /** ${inheritDoc} */
+  override def find(id: E#ID): Option[E] = _repository.find(id)
+
+  /** ${inheritDoc} */
+  override def store(id: E#ID, entity: E): Unit = _repository.store(id, entity)
 }
