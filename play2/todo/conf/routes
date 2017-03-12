@@ -12,8 +12,8 @@ GET     /message                    controllers.AsyncController.message
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
-GET     /v1/users                   controllers.TodoController.userList
-POST    /v1/users                   controllers.TodoController.addUser
+GET     /v1/users                   controllers.UserController.userList
+POST    /v1/users                   controllers.UserController.addUser
 
-GET     /v1/users/$id<[0-9]+>       controllers.TodoController.getUser(id: Int)
-PATCH   /v1/users/$id<[0-9]+>       controllers.TodoController.patchUser(id: Int)
+GET     /v1/users/$id<[0-9]+>       controllers.UserController.getUser(id: Int)
+PATCH   /v1/users/$id<[0-9]+>       controllers.UserController.patchUser(id: Int)

@@ -6,16 +6,20 @@ import play.api._
 import play.api.libs.json._
 import play.api.mvc._
 import exceptions.{JsonParseException, ResourceNotFoundException}
-import infrastructures.convert.UserConverter
+import infrastructures.convert._
 import models.{User, UserId, UserRepository}
 import services.UserServiceFactory
 
 
 @Singleton
-class TodoController @Inject()(
+class UserController @Inject()(
   userRepository: UserRepository,
   userServiceFactory: UserServiceFactory
 ) extends Controller with UserConverter {
+
+  // ----------------------------------------------------------------------------------------------
+  // ユーザ関連のAPI
+  // ----------------------------------------------------------------------------------------------
 
   case class AddUserRequest(name: String)
   case class PatchUserRequest(name: Option[String])
