@@ -15,7 +15,7 @@ import services.UserServiceFactory
 class UserController @Inject()(
   userRepository: UserRepository,
   userServiceFactory: UserServiceFactory
-) extends Controller with UserConverter {
+) extends TodoControllerBase(userRepository) with UserConverter {
 
   // ----------------------------------------------------------------------------------------------
   // ユーザ関連のAPI
@@ -27,30 +27,12 @@ class UserController @Inject()(
   private implicit val addUserRequestReads = Json.reads[AddUserRequest]
   private implicit val patchUserRequestReads = Json.reads[PatchUserRequest]
 
-  private implicit val jsonParseExceptionWrites = Json.writes[JsonParseException]
-  private implicit val resourceNotFoundExceptionWrites = Json.writes[ResourceNotFoundException]
-
   def userList() = Action {
     val users = userRepository.findAll()
     Ok(JsObject(Map(
       "total" -> JsNumber(users.length),
       "users" -> Json.toJson(users)
     )))
-  }
-
-  // TODO: getOrElse あたりの書き方が汚いので、良い書き方がないか確認すること
-  private[this] def jsonAction[TRequest](request: Request[AnyContent], reads: Reads[TRequest])(action: TRequest => Result): Result = {
-    request.body.asJson.map { json =>
-      Json.fromJson[TRequest](json)(reads).map(requestData => {
-        action(requestData)
-      }).getOrElse(BadRequest(Json.toJson(JsonParseException())))
-    }.getOrElse(BadRequest(Json.toJson(JsonParseException())))
-  }
-
-  private[this] def withUser(id: Int)(action: User => Result): Result = {
-    userRepository.find(UserId(id)).map(user =>
-      action(user)
-    ).getOrElse(NotFound(Json.toJson(ResourceNotFoundException("user", id))))
   }
 
   def addUser() = Action { request =>
