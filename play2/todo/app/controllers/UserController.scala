@@ -39,7 +39,7 @@ class UserController @Inject()(
     jsonAction[AddUserRequest](request, addUserRequestReads) { addUserRequest =>
       val service = userServiceFactory.create(userRepository)
       val user = service.createUser(addUserRequest.name)
-      Ok(Json.toJson(user))
+      Created(Json.toJson(user))
     }
   }
 
