@@ -44,10 +44,12 @@ class TaskController @Inject()(
   private implicit val createUserTaskRequestReads = Json.reads[CreateUserTaskRequest]
   private implicit val patchUserTaskRequestReads = Json.reads[PatchUserTaskRequest]
 
-  private[this] def withTask(id: Int)(action: Task => Result): Result = {
-    taskRepository.find(TaskId(id)).map(task =>
-      action(task)
-    ).getOrElse(NotFound(Json.toJson(ResourceNotFoundException("task", id))))
+  private[this] def withUserTask(userId: UserId, taskId: TaskId)(action: Task => Result): Result = {
+    userTaskRepository.find(UserTaskRelation(userId, taskId)).flatMap(_ => {
+      taskRepository.find(taskId).map(task =>
+        action(task)
+      )
+    }).getOrElse(NotFound(Json.toJson(ResourceNotFoundException("task", taskId.value))))
   }
 
   def listUserTasks(userId: Int) = Action {
@@ -72,7 +74,7 @@ class TaskController @Inject()(
 
   def getUserTask(userId: Int, taskId: Int) = Action {
     withUser(userId) { _ => // ユーザの存在確認でアクセスする
-      withTask(taskId) { task =>
+      withUserTask(UserId(userId), TaskId(taskId)) { task =>
         Ok(Json.toJson(task))
       }
     }
@@ -109,7 +111,7 @@ class TaskController @Inject()(
   def patchUserTask(userId: Int, taskId: Int) = Action { request =>
     jsonAction[PatchUserTaskRequest](request, patchUserTaskRequestReads) { requestData =>
       withUser(userId) { user =>
-        withTask(taskId) { task =>
+        withUserTask(user.id, TaskId(taskId)) { task =>
           val patchedTask = applyPatch(task, requestData)
           val userTaskService = userTaskServiceFactory.create(taskRepository, userTaskRepository)
           userTaskService.updateTask(user.id, patchedTask)
@@ -121,7 +123,7 @@ class TaskController @Inject()(
 
   def deleteUserTask(userId: Int, taskId: Int) = Action {
     withUser(userId) { user => // ユーザの存在確認でアクセスする
-      withTask(taskId) { task =>  // タスクの存在確認でアクセスする
+      withUserTask(user.id, TaskId(taskId)) { task =>  // タスクの存在確認でアクセスする
         val userTaskService = userTaskServiceFactory.create(taskRepository, userTaskRepository)
         userTaskService.deleteTask(user.id, task.id)
 
