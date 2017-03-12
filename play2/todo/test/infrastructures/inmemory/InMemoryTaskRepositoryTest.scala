@@ -8,7 +8,7 @@ import org.scalatestplus.play.PlaySpec
 class InMemoryTaskRepositoryTest extends PlaySpec with MockitoSugar {
   def mockTask(id: TaskId): Task = {
     // NOTE: StringとDateTimeはmockできないのでダミーの値を設定する
-    Task(id, "", mock[Option[String]], mock[Option[DateTime]], new DateTime(), mock[Option[DateTime]])
+    Task(id, "", mock[Option[String]], mock[Option[DateTime]], new DateTime(1, 1, 1, 0, 0, 0), mock[Option[DateTime]])
   }
 
   "InMemoryTaskRepository#find" should {
