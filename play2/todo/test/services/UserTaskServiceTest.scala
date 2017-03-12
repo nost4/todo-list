@@ -19,16 +19,25 @@ class UserTaskServiceTest extends PlaySpec with MockitoSugar {
       val userTaskRepository = new InMemoryUserTaskRepository()
       val service = new UserTaskServiceImpl(taskRepository, userTaskRepository)
 
+      val user = mockUser(UserId("1"))
+
+      // タスク1
       taskRepository.find(TaskId("1")) mustBe None
       userTaskRepository.find((UserId("1"), TaskId("1"))) mustBe None
 
-      val user = mockUser(UserId("1"))
-      val task = mockTask(TaskId("1"))
-      val userTask = service.createNewTask(user, task)
+      val firstUserTask = service.createNewTask(user, mockTask(TaskId("1")))
+      firstUserTask.user.id mustBe UserId("1")
+      firstUserTask.task.id mustBe TaskId("1")
+      userTaskRepository.find((UserId("1"), TaskId("1"))) mustBe Some(firstUserTask)
 
-      userTask.user.id mustBe UserId("1")
-      userTask.task.id mustBe TaskId("1")
-      userTaskRepository.find((UserId("1"), TaskId("1"))) mustBe Some(userTask)
+      // タスク2
+      taskRepository.find(TaskId("2")) mustBe None
+      userTaskRepository.find((UserId("1"), TaskId("2"))) mustBe None
+
+      val secondUserTask = service.createNewTask(user, mockTask(TaskId("2")))
+      secondUserTask.user.id mustBe UserId("1")
+      secondUserTask.task.id mustBe TaskId("2")
+      userTaskRepository.find((UserId("1"), TaskId("2"))) mustBe Some(secondUserTask)
     }
   }
 }
