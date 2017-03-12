@@ -4,8 +4,9 @@ import org.scalatestplus.play.PlaySpec
 import shared.Entity
 
 class InMemoryRepositoryTest extends PlaySpec {
+  // 確認用のダミーエンティティとリポジトリ
   case class PersonId(value: Int)
-  case class Person(id: PersonId) extends Entity { type ID = PersonId }
+  case class Person(id: PersonId, name: String) extends Entity { type ID = PersonId }
   class InMemoryPersonRepository extends InMemoryRepository[Person] {
   }
 
@@ -13,13 +14,25 @@ class InMemoryRepositoryTest extends PlaySpec {
     "return none if repository is empty" in {
       new InMemoryPersonRepository().find(PersonId(1)) mustBe None
     }
+  }
 
-    "can store person" in {
-      val person = Person(PersonId(1))
+  "InMemoryRepositoryTest#store" should {
+    "store new person" in {
+      val person = Person(PersonId(1), "Taro")
       val repository = new InMemoryPersonRepository()
-      repository.store(Person(PersonId(1)))
+      repository.store(person)
 
       repository.find(PersonId(1)) mustBe Some(person)
+    }
+
+    "overwrite stored person" in {
+      val taro = Person(PersonId(1), "Taro")
+      val repository = new InMemoryPersonRepository()
+      repository.store(taro)
+
+      val jiro = taro.copy(name="Jiro")
+      repository.store(jiro)
+      repository.find(PersonId(1)) mustBe Some(jiro)
     }
   }
 }
