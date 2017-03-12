@@ -1,7 +1,5 @@
 package shared
 
-import java.util.UUID
-
 
 /**
   * リポジトリ
@@ -48,10 +46,4 @@ abstract class EntityRepository[E<: Entity] extends Repository[E#ID, E] {
     * @param entity エンティティ
     */
   def update(entity: E): Unit = store(entity.id, entity)
-
-  /**
-    * UUIDを生成する
-    * @return UUID
-    */
-  protected def generateUUID(): UUID = UUID.randomUUID()
 }

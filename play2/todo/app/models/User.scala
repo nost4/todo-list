@@ -1,7 +1,5 @@
 package models
 
-import java.util.UUID
-
 import shared.Entity
 
 
