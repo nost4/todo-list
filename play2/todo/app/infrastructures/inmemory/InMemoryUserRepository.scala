@@ -8,5 +8,5 @@ import models.{User, UserRepository}
   */
 class InMemoryUserRepository extends InMemoryRepository[User] with UserRepository {
   /** ${inheritDoc} */
-  override def findAll(): List[User] = _entities.values.toList
+  override def findAll(): List[User] = entities.values.toList
 }
