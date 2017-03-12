@@ -32,7 +32,7 @@ class InMemoryRepositoryTest extends PlaySpec {
       repository.create(taro)
 
       val jiro = taro.copy(name="Jiro")
-      repository.store(jiro)
+      repository.update(jiro)
       repository.find(PersonId(1)) mustBe Some(jiro)
     }
   }

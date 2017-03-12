@@ -5,7 +5,7 @@ import java.util.UUID
 
 /**
   * リポジトリ
- *
+  *
   * @tparam K キー値の型
   * @tparam V 値の型
   */
@@ -21,7 +21,7 @@ trait Repository[K, V] {
   def find(key: Key): Option[Value]
 
   /**
-    * 指定したキーで値を保存する
+    * 指定したキーで値を更新する
     * @param key キー
     * @param value 値
     */
@@ -37,10 +37,17 @@ trait Repository[K, V] {
 abstract class EntityRepository[E<: Entity] extends Repository[E#ID, E] {
 
   /**
-    * エンティティを保存する
+    * エンティティを作成する
+    * @param entity エンティティ(仮)
+    * @return エンティティ(確定)
+    */
+  def create(entity: E): E
+
+  /**
+    * エンティティを更新する
     * @param entity エンティティ
     */
-  def store(entity: E): Unit = store(entity.id, entity)
+  def update(entity: E): Unit = store(entity.id, entity)
 
   /**
     * UUIDを生成する
