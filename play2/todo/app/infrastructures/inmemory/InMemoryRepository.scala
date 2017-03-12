@@ -1,8 +1,10 @@
 package infrastructures.inmemory
 
-import shared.{Entity, EntityRepository, Repository}
+import java.util.concurrent.ConcurrentHashMap
 
-import scala.collection.mutable
+import scala.collection.convert.decorateAsScala._
+
+import shared.{Entity, EntityRepository, Repository}
 
 
 /**
@@ -12,7 +14,7 @@ import scala.collection.mutable
   */
 class InMemoryRepository[K, V] extends Repository[K, V] {
   /** エンティティのマップ、エンティティの識別子をキーとして管理 */
-  private[this] val _entries = mutable.HashMap.empty[Key, Value]
+  private[this] val _entries = new ConcurrentHashMap[K, V]().asScala
 
   /**
     * エンティティのマップを取得する、 _entitiesの直更新を避けるためimmutable化
