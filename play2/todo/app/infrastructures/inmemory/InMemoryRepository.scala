@@ -12,19 +12,19 @@ import scala.collection.mutable
   */
 class InMemoryRepository[K, V] extends Repository[K, V] {
   /** エンティティのマップ、エンティティの識別子をキーとして管理 */
-  private[this] val _entries = mutable.HashMap.empty[K, V]
+  private[this] val _entries = mutable.HashMap.empty[Key, Value]
 
   /**
     * エンティティのマップを取得する、 _entitiesの直更新を避けるためimmutable化
     * @return エンティティのマップ
     */
-  def entries: Map[K, V] = _entries.toMap
+  def entries: Map[Key, Value] = _entries.toMap
 
   /** ${inheritDoc} */
-  override def find(key: K): Option[V] = _entries.find(_._1 == key).map(_._2)
+  override def find(key: Key): Option[Value] = _entries.find(_._1 == key).map(_._2)
 
   /** ${inheritDoc} */
-  override def store(key: K, value: V): Unit = _entries.put(key, value)
+  override def store(key: Key, value: Value): Unit = _entries.put(key, value)
 }
 
 

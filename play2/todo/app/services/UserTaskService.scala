@@ -7,26 +7,29 @@ import models._
   */
 trait UserTaskService {
   /**
-    * ユーザにタスクを割り当てる
-    * @param user 割当先のユーザ
-    * @param task タスク
+    * ユーザのタスクを作成する
+    * @param user 対象のユーザ
+    * @param task 新規タスク
     * @return ユーザタスク
     */
-  def assignTaskToUser(user: User, task: Task): UserTask
+  def createNewTask(user: User, task: Task): UserTask
 }
 
 
 /**
   * ユーザ-タスク間のサービスの実装
   */
-class UserTaskServiceImpl(userTaskRepository: UserTaskRepository) extends UserTaskService {
+class UserTaskServiceImpl(taskRepository: TaskRepository, userTaskRepository: UserTaskRepository) extends UserTaskService {
 
   /** ユーザタスクの簡易実装 */
   case class UserTaskImpl(user: User, task: Task) extends UserTask
 
   /** ${inheritDoc} */
-  override def assignTaskToUser(user: User, task: Task): UserTask = {
+  override def createNewTask(user: User, task: Task): UserTask = {
     val userTask = UserTaskImpl(user, task)
+
+    // タスクを追加する
+    taskRepository.store(task)
 
     // 関連のリポジトリに保存する
     userTaskRepository.store(userTask)

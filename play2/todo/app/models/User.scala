@@ -1,5 +1,7 @@
 package models
 
+import java.util.UUID
+
 import shared.Entity
 
 
@@ -8,7 +10,7 @@ import shared.Entity
   *
   * @param value 識別子の値
   */
-case class UserId(value: Int)
+case class UserId(value: String)
 
 
 /**

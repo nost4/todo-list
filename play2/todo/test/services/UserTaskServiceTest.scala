@@ -1,6 +1,6 @@
 package services
 
-import infrastructures.inmemory.InMemoryUserTaskRepository
+import infrastructures.inmemory.{InMemoryTaskRepository, InMemoryUserTaskRepository}
 import models.{Task, TaskId, User, UserId}
 import org.joda.time.DateTime
 import org.scalatest.mock.MockitoSugar
@@ -15,16 +15,20 @@ class UserTaskServiceTest extends PlaySpec with MockitoSugar {
 
   "UserTaskService#assignTaskToUser" should {
     "store user-task relationship into repository" in {
-      val repository = new InMemoryUserTaskRepository()
-      val service = new UserTaskServiceImpl(repository)
+      val taskRepository = new InMemoryTaskRepository()
+      val userTaskRepository = new InMemoryUserTaskRepository()
+      val service = new UserTaskServiceImpl(taskRepository, userTaskRepository)
 
-      val user = mockUser(UserId(1))
-      val task = mockTask(TaskId(1))
-      val userTask = service.assignTaskToUser(user, task)
+      taskRepository.find(TaskId("1")) mustBe None
+      userTaskRepository.find((UserId("1"), TaskId("1"))) mustBe None
 
-      userTask.user.id mustBe user.id
-      userTask.task.id mustBe task.id
-      repository.find((user.id, task.id)) mustBe Some(userTask)
+      val user = mockUser(UserId("1"))
+      val task = mockTask(TaskId("1"))
+      val userTask = service.createNewTask(user, task)
+
+      userTask.user.id mustBe UserId("1")
+      userTask.task.id mustBe TaskId("1")
+      userTaskRepository.find((UserId("1"), TaskId("1"))) mustBe Some(userTask)
     }
   }
 }
