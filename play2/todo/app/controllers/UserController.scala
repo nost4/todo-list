@@ -27,7 +27,7 @@ class UserController @Inject()(
   private implicit val addUserRequestReads = Json.reads[AddUserRequest]
   private implicit val patchUserRequestReads = Json.reads[PatchUserRequest]
 
-  def userList() = Action {
+  def listUsers() = Action {
     val users = userRepository.findAll()
     Ok(JsObject(Map(
       "total" -> JsNumber(users.length),
