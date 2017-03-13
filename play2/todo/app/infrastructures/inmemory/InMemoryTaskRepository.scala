@@ -19,5 +19,6 @@ class InMemoryTaskRepository extends InMemoryEntityRepository[Task] with TaskRep
 
   /** ${inheritDoc} */
   override def delete(taskId: TaskId)(implicit context: Context): Unit = {
+    remove(taskId)
   }
 }
