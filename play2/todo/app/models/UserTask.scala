@@ -18,4 +18,7 @@ trait UserTask {
 
   /** タスクを取得する */
   def task: Task
+
+  /** ユーザとタスクの関連を取得する */
+  def relation: UserTaskRelation = UserTaskRelation(user.id, task.id)
 }
