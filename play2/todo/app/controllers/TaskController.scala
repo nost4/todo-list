@@ -9,6 +9,7 @@ import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.api.mvc._
 import services.UserTaskServiceFactory
+import shared.IOContext
 
 
 @Singleton
@@ -17,7 +18,7 @@ class TaskController @Inject()(
   taskRepository: TaskRepository,
   userTaskRepository: UserTaskRepository,
   userTaskServiceFactory: UserTaskServiceFactory
-) extends TodoControllerBase(userRepository) with UserConverter with TaskConverter with DateTimeConverter {
+)(implicit context: IOContext) extends TodoControllerBase(userRepository) with UserConverter with TaskConverter with DateTimeConverter {
 
   // ----------------------------------------------------------------------------------------------
   // タスク関連のAPI

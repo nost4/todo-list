@@ -4,9 +4,10 @@ import exceptions.{JsonParseException, ResourceNotFoundException}
 import models.{User, UserId, UserRepository}
 import play.api.libs.json.{Json, Reads}
 import play.api.mvc.{AnyContent, Controller, Request, Result}
+import shared.IOContext
 
 
-abstract class TodoControllerBase(userRepository: UserRepository) extends Controller {
+abstract class TodoControllerBase(userRepository: UserRepository)(implicit context: IOContext) extends Controller {
   protected implicit val jsonParseExceptionWrites = Json.writes[JsonParseException]
   protected implicit val resourceNotFoundExceptionWrites = Json.writes[ResourceNotFoundException]
 

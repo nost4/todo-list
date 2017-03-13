@@ -2,6 +2,7 @@ package services
 
 import models._
 import org.joda.time.DateTime
+import shared.IOContext
 
 /**
   * ユーザ-タスク間のサービス
@@ -43,7 +44,11 @@ trait UserTaskService {
 /**
   * ユーザ-タスク間のサービスの実装
   */
-class UserTaskServiceImpl(taskRepository: TaskRepository, userTaskRepository: UserTaskRepository) extends UserTaskService {
+class UserTaskServiceImpl(
+  taskRepository: TaskRepository,
+  userTaskRepository: UserTaskRepository
+)(implicit context: IOContext) extends UserTaskService {
+
   import infrastructures.chrono.TzAsiaTokyo
 
   /** ユーザタスクの簡易実装 */
@@ -90,7 +95,7 @@ class UserTaskServiceImpl(taskRepository: TaskRepository, userTaskRepository: Us
   * ユーザタスクサービスのファクトリ
   */
 trait UserTaskServiceFactory {
-  def create(taskRepository: TaskRepository, userTaskRepository: UserTaskRepository): UserTaskService
+  def create(taskRepository: TaskRepository, userTaskRepository: UserTaskRepository)(implicit context: IOContext): UserTaskService
 }
 
 
@@ -98,7 +103,7 @@ trait UserTaskServiceFactory {
   * ユーザタスクサービスのファクトリの実装
   */
 class UserTaskServiceFactoryImpl extends UserTaskServiceFactory {
-  def create(taskRepository: TaskRepository, userTaskRepository: UserTaskRepository): UserTaskService = {
+  def create(taskRepository: TaskRepository, userTaskRepository: UserTaskRepository)(implicit context: IOContext): UserTaskService = {
     new UserTaskServiceImpl(taskRepository, userTaskRepository)
   }
 }

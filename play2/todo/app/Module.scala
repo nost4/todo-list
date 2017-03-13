@@ -1,9 +1,10 @@
 import com.google.inject.AbstractModule
 import java.time.Clock
 
-import infrastructures.inmemory.{InMemoryTaskRepository, InMemoryUserRepository, InMemoryUserTaskRepository}
+import infrastructures.inmemory.{InMemoryIOContext, InMemoryTaskRepository, InMemoryUserRepository, InMemoryUserTaskRepository}
 import models.{TaskRepository, UserRepository, UserTaskRepository}
 import services._
+import shared.IOContext
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -25,6 +26,9 @@ class Module extends AbstractModule {
     bind(classOf[ApplicationTimer]).asEagerSingleton()
     // Set AtomicCounter as the implementation for Counter.
     bind(classOf[Counter]).to(classOf[AtomicCounter])
+
+    // IOコンテキスト
+    bind(classOf[IOContext]).toInstance(InMemoryIOContext)
 
     // ユーザ関連の依存
     bind(classOf[UserRepository]).toInstance(new InMemoryUserRepository())

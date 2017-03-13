@@ -9,13 +9,14 @@ import exceptions.{JsonParseException, ResourceNotFoundException}
 import infrastructures.convert._
 import models.{User, UserId, UserRepository}
 import services.UserServiceFactory
+import shared.IOContext
 
 
 @Singleton
 class UserController @Inject()(
   userRepository: UserRepository,
   userServiceFactory: UserServiceFactory
-) extends TodoControllerBase(userRepository) with UserConverter {
+)(implicit context: IOContext) extends TodoControllerBase(userRepository) with UserConverter {
 
   // ----------------------------------------------------------------------------------------------
   // ユーザ関連のAPI
