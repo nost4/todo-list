@@ -1,15 +1,18 @@
 package infrastructures.inmemory
 
 import org.scalatestplus.play.PlaySpec
-import shared.Entity
+import shared.{Entity, IOContext}
 
 class InMemoryRepositoryTest extends PlaySpec {
   // 確認用のダミーエンティティとリポジトリ
   case class PersonId(value: Int)
   case class Person(id: PersonId, name: String) extends Entity { type ID = PersonId }
+
   class InMemoryPersonRepository extends InMemoryEntityRepository[Person] {
-    def create(person: Person): Person = createNew(idHint => person.copy(id = PersonId(idHint)))
+    def create(person: Person)(implicit context: IOContext): Person = createNew(idHint => person.copy(id = PersonId(idHint)))
   }
+
+  implicit val context = InMemoryIOContext
 
   "InMemoryRepositoryTest#find" should {
     "return none if repository is empty" in {

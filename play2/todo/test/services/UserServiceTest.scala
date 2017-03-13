@@ -1,11 +1,13 @@
 package services
 
-import infrastructures.inmemory.InMemoryUserRepository
+import infrastructures.inmemory.{InMemoryIOContext, InMemoryUserRepository}
 import models.{User, UserId}
 import org.scalatestplus.play.PlaySpec
 
 
 class UserServiceTest extends PlaySpec {
+  implicit val context = InMemoryIOContext
+
   "UserService#createUser" should {
     "create new user" in {
       val repository = new InMemoryUserRepository()

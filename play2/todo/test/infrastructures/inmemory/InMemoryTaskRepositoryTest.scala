@@ -11,6 +11,8 @@ class InMemoryTaskRepositoryTest extends PlaySpec with MockitoSugar {
     Task(id, "", mock[Option[String]], mock[Option[DateTime]], new DateTime(1, 1, 1, 0, 0, 0), mock[Option[DateTime]])
   }
 
+  implicit val context = InMemoryIOContext
+
   "InMemoryTaskRepository#find" should {
     "returns specific tasks" in {
       val repository = new InMemoryTaskRepository()
