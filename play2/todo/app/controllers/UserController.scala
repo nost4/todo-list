@@ -7,16 +7,21 @@ import play.api.libs.json._
 import play.api.mvc._
 import exceptions.{JsonParseException, ResourceNotFoundException}
 import infrastructures.convert._
+import infrastructures.persistence.h2db.H2IOContext
 import models.{User, UserId, UserRepository}
+import play.api.db.slick.DatabaseConfigProvider
 import services.UserServiceFactory
 import shared.IOContext
+import slick.driver.JdbcProfile
 
 
 @Singleton
 class UserController @Inject()(
   userRepository: UserRepository,
-  userServiceFactory: UserServiceFactory
-)(implicit context: IOContext) extends TodoControllerBase(userRepository) with UserConverter {
+  userServiceFactory: UserServiceFactory,
+  dbConfigProvider: DatabaseConfigProvider
+) extends TodoControllerBase(userRepository, H2IOContextHelper(dbConfigProvider))
+    with UserConverter {
 
   // ----------------------------------------------------------------------------------------------
   // ユーザ関連のAPI
@@ -29,41 +34,49 @@ class UserController @Inject()(
   private implicit val patchUserRequestReads = Json.reads[PatchUserRequest]
 
   def listUsers() = Action {
-    val users = userRepository.findAll()
-    Ok(JsObject(Map(
-      "total" -> JsNumber(users.length),
-      "users" -> Json.toJson(users)
-    )))
+    withContext { implicit context =>
+      val users = userRepository.findAll()
+      Ok(JsObject(Map(
+        "total" -> JsNumber(users.length),
+        "users" -> Json.toJson(users)
+      )))
+    }
   }
 
   def addUser() = Action { request =>
-    jsonAction[AddUserRequest](request, addUserRequestReads) { addUserRequest =>
-      val service = userServiceFactory.create(userRepository)
-      val user = service.createUser(addUserRequest.name)
-      Created(Json.toJson(user))
+    withContext { implicit context =>
+      jsonAction[AddUserRequest](request, addUserRequestReads) { addUserRequest =>
+        val service = userServiceFactory.create(userRepository)
+        val user = service.createUser(addUserRequest.name)
+        Created(Json.toJson(user))
+      }
     }
   }
 
   def getUser(id: Int) = Action {
-    withUser(id) { user => Ok(Json.toJson(user)) }
+    withContext { implicit context =>
+      withUser(id) { user => Ok(Json.toJson(user)) }
+    }
   }
 
   def patchUser(id: Int) = Action { request =>
-    def applyPatch(user: User, patchUserRequest: PatchUserRequest): User = {
-      def rename(name: Option[String]): User = name match {
-        case Some(n) => user.rename(n)
-        case None => user
+    withContext { implicit context =>
+      def applyPatch(user: User, patchUserRequest: PatchUserRequest): User = {
+        def rename(name: Option[String]): User = name match {
+          case Some(n) => user.rename(n)
+          case None => user
+        }
+
+        // NOTE: 項目が増えたらここでチェーンする
+        rename(patchUserRequest.name)
       }
 
-      // NOTE: 項目が増えたらここでチェーンする
-      rename(patchUserRequest.name)
-    }
-
-    jsonAction[PatchUserRequest](request, patchUserRequestReads) { patchUserRequest =>
-      withUser(id) { user =>
-        val patchedUser = applyPatch(user, patchUserRequest)
-        userRepository.update(patchedUser)
-        Ok(Json.toJson(patchedUser))
+      jsonAction[PatchUserRequest](request, patchUserRequestReads) { patchUserRequest =>
+        withUser(id) { user =>
+          val patchedUser = applyPatch(user, patchUserRequest)
+          userRepository.update(patchedUser)
+          Ok(Json.toJson(patchedUser))
+        }
       }
     }
   }

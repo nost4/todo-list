@@ -6,6 +6,7 @@ import exceptions.ResourceNotFoundException
 import infrastructures.convert.{DateTimeConverter, TaskConverter, UserConverter}
 import models._
 import org.joda.time.DateTime
+import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json.Json
 import play.api.mvc._
 import services.UserTaskServiceFactory
@@ -17,8 +18,10 @@ class TaskController @Inject()(
   userRepository: UserRepository,
   taskRepository: TaskRepository,
   userTaskRepository: UserTaskRepository,
-  userTaskServiceFactory: UserTaskServiceFactory
-)(implicit context: IOContext) extends TodoControllerBase(userRepository) with UserConverter with TaskConverter with DateTimeConverter {
+  userTaskServiceFactory: UserTaskServiceFactory,
+  dbConfigProvider: DatabaseConfigProvider
+) extends TodoControllerBase(userRepository, H2IOContextHelper(dbConfigProvider))
+    with UserConverter with TaskConverter with DateTimeConverter {
 
   // ----------------------------------------------------------------------------------------------
   // タスク関連のAPI
@@ -45,7 +48,7 @@ class TaskController @Inject()(
   private implicit val createUserTaskRequestReads = Json.reads[CreateUserTaskRequest]
   private implicit val patchUserTaskRequestReads = Json.reads[PatchUserTaskRequest]
 
-  private[this] def withUserTask(userId: UserId, taskId: TaskId)(action: Task => Result): Result = {
+  private[this] def withUserTask(userId: UserId, taskId: TaskId)(action: Task => Result)(implicit context: IOContext): Result = {
     userTaskRepository.find(UserTaskRelation(userId, taskId)).flatMap(_ => {
       taskRepository.find(taskId).map(task =>
         action(task)
@@ -54,29 +57,35 @@ class TaskController @Inject()(
   }
 
   def listUserTasks(userId: Int) = Action {
-    withUser(userId) { user =>
-      val userTaskService = userTaskServiceFactory.create(taskRepository, userTaskRepository)
-      val userTasks = userTaskService.findTasks(user.id)
+    withContext { implicit context =>
+      withUser(userId) { user =>
+        val userTaskService = userTaskServiceFactory.create(taskRepository, userTaskRepository)
+        val userTasks = userTaskService.findTasks(user.id)
 
-      Ok(Json.toJson(ListUserTaskResponse(userTasks.length, userTasks)))
+        Ok(Json.toJson(ListUserTaskResponse(userTasks.length, userTasks)))
+      }
     }
   }
 
   def createUserTasks(userId: Int) = Action { request =>
     jsonAction[CreateUserTaskRequest](request, createUserTaskRequestReads) { requestData =>
-      withUser(userId) { user =>
-        val userTaskService = userTaskServiceFactory.create(taskRepository, userTaskRepository)
-        val userTask = userTaskService.createNewTask(user, requestData.title, requestData.content, requestData.deadlineAt)
+      withContext { implicit context =>
+        withUser(userId) { user =>
+          val userTaskService = userTaskServiceFactory.create(taskRepository, userTaskRepository)
+          val userTask = userTaskService.createNewTask(user, requestData.title, requestData.content, requestData.deadlineAt)
 
-        Created(Json.toJson(userTask.task))
+          Created(Json.toJson(userTask.task))
+        }
       }
     }
   }
 
   def getUserTask(userId: Int, taskId: Int) = Action {
-    withUser(userId) { _ => // ユーザの存在確認でアクセスする
-      withUserTask(UserId(userId), TaskId(taskId)) { task =>
-        Ok(Json.toJson(task))
+    withContext { implicit context =>
+      withUser(userId) { _ => // ユーザの存在確認でアクセスする
+        withUserTask(UserId(userId), TaskId(taskId)) { task =>
+          Ok(Json.toJson(task))
+        }
       }
     }
   }
@@ -111,24 +120,28 @@ class TaskController @Inject()(
 
   def patchUserTask(userId: Int, taskId: Int) = Action { request =>
     jsonAction[PatchUserTaskRequest](request, patchUserTaskRequestReads) { requestData =>
-      withUser(userId) { user =>
-        withUserTask(user.id, TaskId(taskId)) { task =>
-          val patchedTask = applyPatch(task, requestData)
-          val userTaskService = userTaskServiceFactory.create(taskRepository, userTaskRepository)
-          userTaskService.updateTask(user.id, patchedTask)
-          Ok(Json.toJson(patchedTask))
+      withContext { implicit context =>
+        withUser(userId) { user =>
+          withUserTask(user.id, TaskId(taskId)) { task =>
+            val patchedTask = applyPatch(task, requestData)
+            val userTaskService = userTaskServiceFactory.create(taskRepository, userTaskRepository)
+            userTaskService.updateTask(user.id, patchedTask)
+            Ok(Json.toJson(patchedTask))
+          }
         }
       }
     }
   }
 
   def deleteUserTask(userId: Int, taskId: Int) = Action {
-    withUser(userId) { user => // ユーザの存在確認でアクセスする
-      withUserTask(user.id, TaskId(taskId)) { task =>  // タスクの存在確認でアクセスする
-        val userTaskService = userTaskServiceFactory.create(taskRepository, userTaskRepository)
-        userTaskService.deleteTask(user.id, task.id)
+    withContext { implicit context =>
+      withUser(userId) { user => // ユーザの存在確認でアクセスする
+        withUserTask(user.id, TaskId(taskId)) { task =>  // タスクの存在確認でアクセスする
+          val userTaskService = userTaskServiceFactory.create(taskRepository, userTaskRepository)
+          userTaskService.deleteTask(user.id, task.id)
 
-        NoContent
+          NoContent
+        }
       }
     }
   }

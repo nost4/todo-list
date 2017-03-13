@@ -27,9 +27,6 @@ class Module extends AbstractModule {
     // Set AtomicCounter as the implementation for Counter.
     bind(classOf[Counter]).to(classOf[AtomicCounter])
 
-    // IOコンテキスト
-    bind(classOf[IOContext]).toInstance(InMemoryIOContext)
-
     // ユーザ関連の依存
     bind(classOf[UserRepository]).toInstance(new InMemoryUserRepository())
     bind(classOf[UserServiceFactory]).toInstance(new UserServiceFactoryImpl())
