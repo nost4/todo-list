@@ -14,7 +14,7 @@ case class ScalikeIOContext(session: DBSession) extends IOContext
 /**
   * ScalikeJDBC用のIOコンテキストヘルパー
   */
-case class ScalikeContextHelper() extends IOContextHelper with ScalikeIOContextMixin {
+case class ScalikeIOContextHelper() extends IOContextHelper with ScalikeIOContextMixin {
   /** ${inheritDoc} */
   override def withReadOnlyContext[A](f: (IOContext) => A): A = {
     DB readOnly { session =>

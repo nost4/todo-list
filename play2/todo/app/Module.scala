@@ -2,7 +2,7 @@ import com.google.inject.AbstractModule
 import java.time.Clock
 
 import infrastructures.inmemory.{InMemoryIOContext, InMemoryIOContextHelper, InMemoryTaskRepository, InMemoryUserRepository, InMemoryUserTaskRepository}
-import infrastructures.persistence.scalike.{ScalikeTaskRepository, ScalikeUserRepository, ScalikeUserTaskRepository}
+import infrastructures.persistence.scalike.{ScalikeIOContextHelper, ScalikeTaskRepository, ScalikeUserRepository, ScalikeUserTaskRepository}
 import models.{TaskRepository, UserRepository, UserTaskRepository}
 import services._
 import shared.IOContextHelper
@@ -29,15 +29,15 @@ class Module extends AbstractModule {
     bind(classOf[Counter]).to(classOf[AtomicCounter])
 
     // IOコンテキストのヘルパー
-    bind(classOf[IOContextHelper]).to(classOf[InMemoryIOContextHelper])
+    bind(classOf[IOContextHelper]).to(classOf[ScalikeIOContextHelper])
 
     // ユーザ関連の依存
-    bind(classOf[UserRepository]).to(classOf[InMemoryUserRepository])
+    bind(classOf[UserRepository]).to(classOf[ScalikeUserRepository])
     bind(classOf[UserServiceFactory]).to(classOf[UserServiceFactoryImpl])
 
     // タスク・ユーザタスク関連の依存
-    bind(classOf[TaskRepository]).to(classOf[InMemoryTaskRepository])
-    bind(classOf[UserTaskRepository]).to(classOf[InMemoryUserTaskRepository])
+    bind(classOf[TaskRepository]).to(classOf[ScalikeTaskRepository])
+    bind(classOf[UserTaskRepository]).to(classOf[ScalikeUserTaskRepository])
     bind(classOf[UserTaskServiceFactory]).to(classOf[UserTaskServiceFactoryImpl])
   }
 }
