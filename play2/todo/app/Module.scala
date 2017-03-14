@@ -1,9 +1,11 @@
 import com.google.inject.AbstractModule
 import java.time.Clock
 
-import infrastructures.inmemory.{InMemoryTaskRepository, InMemoryUserRepository, InMemoryUserTaskRepository}
+import infrastructures.inmemory.{InMemoryIOContext, InMemoryIOContextHelper, InMemoryTaskRepository, InMemoryUserRepository, InMemoryUserTaskRepository}
+import infrastructures.persistence.scalike.{ScalikeIOContextHelper, ScalikeTaskRepository, ScalikeUserRepository, ScalikeUserTaskRepository}
 import models.{TaskRepository, UserRepository, UserTaskRepository}
 import services._
+import shared.IOContextHelper
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -26,14 +28,17 @@ class Module extends AbstractModule {
     // Set AtomicCounter as the implementation for Counter.
     bind(classOf[Counter]).to(classOf[AtomicCounter])
 
+    // IOコンテキストのヘルパー
+    bind(classOf[IOContextHelper]).to(classOf[ScalikeIOContextHelper])
+
     // ユーザ関連の依存
-    bind(classOf[UserRepository]).toInstance(new InMemoryUserRepository())
-    bind(classOf[UserServiceFactory]).toInstance(new UserServiceFactoryImpl())
+    bind(classOf[UserRepository]).to(classOf[ScalikeUserRepository])
+    bind(classOf[UserServiceFactory]).to(classOf[UserServiceFactoryImpl])
 
     // タスク・ユーザタスク関連の依存
-    bind(classOf[TaskRepository]).toInstance(new InMemoryTaskRepository())
-    bind(classOf[UserTaskRepository]).toInstance(new InMemoryUserTaskRepository())
-    bind(classOf[UserTaskServiceFactory]).toInstance(new UserTaskServiceFactoryImpl())
+    bind(classOf[TaskRepository]).to(classOf[ScalikeTaskRepository])
+    bind(classOf[UserTaskRepository]).to(classOf[ScalikeUserTaskRepository])
+    bind(classOf[UserTaskServiceFactory]).to(classOf[UserTaskServiceFactoryImpl])
   }
 }
 

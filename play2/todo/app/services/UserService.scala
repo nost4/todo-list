@@ -1,6 +1,7 @@
 package services
 
 import models.{User, UserId, UserRepository}
+import shared.IOContext
 
 
 /**
@@ -21,7 +22,7 @@ trait UserService {
   * ユーザ関連サービスの実装
   * @param userRepository ユーザのリポジトリ
   */
-class UserServiceImpl(userRepository: UserRepository) extends UserService {
+class UserServiceImpl(userRepository: UserRepository)(implicit context: IOContext) extends UserService {
 
   /** ${inheritDoc} */
   override def createUser(name: String): User = {
@@ -32,12 +33,12 @@ class UserServiceImpl(userRepository: UserRepository) extends UserService {
 
 // TODO: 引数付きサービスのインジェクト方法を確認すること
 trait UserServiceFactory {
-  def create(userRepository: UserRepository): UserService
+  def create(userRepository: UserRepository)(implicit context: IOContext): UserService
 }
 
 
 class UserServiceFactoryImpl extends UserServiceFactory {
-  def create(userRepository: UserRepository): UserService = {
+  def create(userRepository: UserRepository)(implicit context: IOContext): UserService = {
     new UserServiceImpl(userRepository)
   }
 }

@@ -22,13 +22,19 @@ class InMemoryRepository[K, V] extends Repository[K, V] {
   def entries: Map[Key, Value] = _entries.toMap
 
   /** ${inheritDoc} */
-  override def find(key: Key): Option[Value] = _entries.find(_._1 == key).map(_._2)
+  override def find(key: Key)(implicit context: Context): Option[Value] = {
+    _entries.find(_._1 == key).map(_._2)
+  }
 
   /** ${inheritDoc} */
-  override def store(key: Key, value: Value): Unit = _entries.put(key, value)
+  override def store(key: Key, value: Value)(implicit context: Context): Unit = {
+    _entries.put(key, value)
+  }
 
   /** ${inheritDoc} */
-  override def remove(key: Key): Unit = _entries.remove(key)
+  override def remove(key: Key)(implicit context: Context): Unit = {
+    _entries.remove(key)
+  }
 }
 
 
@@ -53,7 +59,7 @@ abstract class InMemoryEntityRepository[E <: Entity] extends EntityRepository[E]
     * @param f エンティティ作成関数
     * @return エンティティ
     */
-  protected def createNew(f: Int => E): E = {
+  protected def createNew(f: Int => E)(implicit context: Context): E = {
     _repository.synchronized {
       val idHint = _repository.entries.size + 1
       val entity = f(idHint)
@@ -64,10 +70,10 @@ abstract class InMemoryEntityRepository[E <: Entity] extends EntityRepository[E]
   }
 
   /** ${inheritDoc} */
-  override def find(id: E#ID): Option[E] = _repository.find(id)
+  override def find(id: E#ID)(implicit context: Context): Option[E] = _repository.find(id)
 
   /** ${inheritDoc} */
-  override def store(id: E#ID, entity: E): Unit = {
+  override def store(id: E#ID, entity: E)(implicit context: Context): Unit = {
     _repository.synchronized {
       if (!_repository.entries.contains(id)) {
         throw new IllegalStateException("cannot store new entity")
@@ -77,5 +83,7 @@ abstract class InMemoryEntityRepository[E <: Entity] extends EntityRepository[E]
   }
 
   /** ${inheritDoc} */
-  override def remove(key: Key): Unit = _repository.remove(key)
+  override def remove(key: Key)(implicit context: Context): Unit = {
+    _repository.remove(key)
+  }
 }

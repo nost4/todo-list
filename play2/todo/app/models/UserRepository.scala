@@ -12,5 +12,5 @@ trait UserRepository extends EntityRepository[User] {
     *
     * @return すべてのユーザ
     */
-  def findAll(): List[User]
+  def findAll()(implicit context: Context): List[User]
 }

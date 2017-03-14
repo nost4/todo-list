@@ -4,6 +4,8 @@ import models.{User, UserId}
 import org.scalatestplus.play.PlaySpec
 
 class InMemoryUserRepositoryTest extends PlaySpec {
+  implicit val context = InMemoryIOContext
+
   "InMemoryUserRepository#findAll" should {
     "returns empty list if repository is empty" in {
       new InMemoryUserRepository().findAll() mustBe List.empty[User]
