@@ -34,7 +34,7 @@ class ScalikeUserTaskRepository extends ScalikeRepository[UserTaskRelation, User
     withSession(context) { implicit session =>
       val userId = key.userId.value
       val taskId = key.taskId.value
-      sql"INSERT INTO user_tasks (user_id, task_is) VALUES (${userId}, ${taskId})"
+      sql"INSERT INTO user_tasks (user_id, task_id) VALUES (${userId}, ${taskId})".update.apply()
     }
   }
 

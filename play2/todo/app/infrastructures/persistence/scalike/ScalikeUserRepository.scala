@@ -22,7 +22,7 @@ class ScalikeUserRepository extends ScalikeEntityRepository[User] with UserRepos
   override def create(entity: User)(implicit context: Context): User = {
     withSession(context) { implicit session =>
       val name = entity.name
-      val id = sql"INSERT INTO users VALUES (${name})".updateAndReturnGeneratedKey.apply()
+      val id = sql"INSERT INTO users (name) VALUES (${name})".updateAndReturnGeneratedKey.apply()
 
       entity.copy(id = UserId(id.toInt))
     }
