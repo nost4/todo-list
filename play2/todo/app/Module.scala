@@ -28,13 +28,13 @@ class Module extends AbstractModule {
     bind(classOf[Counter]).to(classOf[AtomicCounter])
 
     // ユーザ関連の依存
-    bind(classOf[UserRepository]).toInstance(new InMemoryUserRepository())
-    bind(classOf[UserServiceFactory]).toInstance(new UserServiceFactoryImpl())
+    bind(classOf[UserRepository]).to(classOf[InMemoryUserRepository])
+    bind(classOf[UserServiceFactory]).to(classOf[UserServiceFactoryImpl])
 
     // タスク・ユーザタスク関連の依存
-    bind(classOf[TaskRepository]).toInstance(new InMemoryTaskRepository())
-    bind(classOf[UserTaskRepository]).toInstance(new InMemoryUserTaskRepository())
-    bind(classOf[UserTaskServiceFactory]).toInstance(new UserTaskServiceFactoryImpl())
+    bind(classOf[TaskRepository]).to(classOf[InMemoryTaskRepository])
+    bind(classOf[UserTaskRepository]).to(classOf[InMemoryUserTaskRepository])
+    bind(classOf[UserTaskServiceFactory]).to(classOf[UserTaskServiceFactoryImpl])
   }
 }
 
