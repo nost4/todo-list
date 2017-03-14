@@ -1,6 +1,7 @@
 package infrastructures.inmemory
 
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 import scala.collection.convert.decorateAsScala._
 import shared.{Entity, EntityRepository, Repository}
@@ -49,6 +50,11 @@ abstract class InMemoryEntityRepository[E <: Entity] extends EntityRepository[E]
   private[this] val _repository = new InMemoryRepository[E#ID, E]()
 
   /**
+    * エンティティ識別子の管理カウンタ
+    */
+  private[this] val _counter = new AtomicInteger()
+
+  /**
     * エンティティのマップを取得する、 _entitiesの直更新を避けるためimmutable化
     * @return エンティティのマップ
     */
@@ -61,7 +67,7 @@ abstract class InMemoryEntityRepository[E <: Entity] extends EntityRepository[E]
     */
   protected def createNew(f: Int => E)(implicit context: Context): E = {
     _repository.synchronized {
-      val idHint = _repository.entries.size + 1
+      val idHint = _counter.incrementAndGet()
       val entity = f(idHint)
       _repository.store(entity.id, entity)
 
