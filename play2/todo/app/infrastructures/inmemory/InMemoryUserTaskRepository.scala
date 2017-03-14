@@ -1,11 +1,14 @@
 package infrastructures.inmemory
 
+import javax.inject.Singleton
+
 import models._
 
 
 /**
   * ユーザタスクのリポジトリ、インメモリ実装
   */
+@Singleton
 class InMemoryUserTaskRepository extends InMemoryRepository[UserTaskRelation, UserTaskRelation] with UserTaskRepository {
   /** ${inheritDoc} */
   override def findTaskIds(userId: UserId)(implicit context: Context): List[TaskId] = {

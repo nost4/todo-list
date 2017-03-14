@@ -1,10 +1,13 @@
 package infrastructures.inmemory
 
+import javax.inject.Singleton
+
 import models.{Task, TaskId, TaskRepository}
 
 /**
   * タスクリポジトリのインメモリ実装
   */
+@Singleton
 class InMemoryTaskRepository extends InMemoryEntityRepository[Task] with TaskRepository {
 
   /** ${inheritDoc} */
