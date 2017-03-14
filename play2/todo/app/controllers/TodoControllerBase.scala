@@ -3,17 +3,13 @@ package controllers
 import scala.util.{Failure, Success, Try}
 import exceptions.{JsonParseException, ResourceNotFoundException}
 import infrastructures.inmemory.InMemoryIOContext
-import infrastructures.persistence.h2db.H2IOContext
 import models.{User, UserId, UserRepository}
-import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json.{Json, Reads}
 import play.api.mvc._
 import shared.IOContext
-import slick.driver.JdbcProfile
 
 
 // TODO: コンテキスト周りの処理、実装方針を再検討すること
-// NOTE: Slick3のDBIOを使うと自前でのcommit/rollbackの制御不要、うまく統合できなかったのでとりあえずセッションを使用する
 
 
 trait IOContextHelper {
@@ -27,25 +23,6 @@ object InMemoryContextHelper extends IOContextHelper {
   override def create(): IOContext = InMemoryIOContext
   override def success(context: IOContext): Unit = {}
   override def failure(context: IOContext): Unit = {}
-}
-
-
-case class H2IOContextHelper(dbConfigProvider: DatabaseConfigProvider) extends IOContextHelper {
-  override def create(): IOContext = {
-    val context = H2IOContext(dbConfigProvider.get[JdbcProfile].db.createSession())
-    context.session.conn.setAutoCommit(false)
-    context
-  }
-
-  override def success(context: IOContext): Unit = context match {
-    case H2IOContext(h2context) => h2context.conn.commit()
-    case _ => new IllegalStateException()
-  }
-
-  override def failure(context: IOContext): Unit = context match {
-    case H2IOContext(h2context) => h2context.conn.rollback()
-    case _ => new IllegalStateException()
-  }
 }
 
 

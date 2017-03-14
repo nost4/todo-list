@@ -7,20 +7,16 @@ import play.api.libs.json._
 import play.api.mvc._
 import exceptions.{JsonParseException, ResourceNotFoundException}
 import infrastructures.convert._
-import infrastructures.persistence.h2db.H2IOContext
 import models.{User, UserId, UserRepository}
-import play.api.db.slick.DatabaseConfigProvider
 import services.UserServiceFactory
 import shared.IOContext
-import slick.driver.JdbcProfile
 
 
 @Singleton
 class UserController @Inject()(
   userRepository: UserRepository,
-  userServiceFactory: UserServiceFactory,
-  dbConfigProvider: DatabaseConfigProvider
-) extends TodoControllerBase(userRepository, H2IOContextHelper(dbConfigProvider))
+  userServiceFactory: UserServiceFactory
+) extends TodoControllerBase(userRepository, InMemoryContextHelper)
     with UserConverter {
 
   // ----------------------------------------------------------------------------------------------

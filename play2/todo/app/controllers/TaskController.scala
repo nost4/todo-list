@@ -6,7 +6,6 @@ import exceptions.ResourceNotFoundException
 import infrastructures.convert.{DateTimeConverter, TaskConverter, UserConverter}
 import models._
 import org.joda.time.DateTime
-import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.json.Json
 import play.api.mvc._
 import services.UserTaskServiceFactory
@@ -18,9 +17,8 @@ class TaskController @Inject()(
   userRepository: UserRepository,
   taskRepository: TaskRepository,
   userTaskRepository: UserTaskRepository,
-  userTaskServiceFactory: UserTaskServiceFactory,
-  dbConfigProvider: DatabaseConfigProvider
-) extends TodoControllerBase(userRepository, H2IOContextHelper(dbConfigProvider))
+  userTaskServiceFactory: UserTaskServiceFactory
+) extends TodoControllerBase(userRepository, InMemoryContextHelper)
     with UserConverter with TaskConverter with DateTimeConverter {
 
   // ----------------------------------------------------------------------------------------------
