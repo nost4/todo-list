@@ -1,7 +1,7 @@
 package infrastructures.persistence.scalike
 
-import scalikejdbc.DBSession
-import shared.IOContext
+import scalikejdbc._
+import shared.{IOContext, IOContextHelper}
 
 
 /**
@@ -9,3 +9,23 @@ import shared.IOContext
   * @param session DBセッション
   */
 case class ScalikeIOContext(session: DBSession) extends IOContext
+
+
+/**
+  * ScalikeJDBC用のIOコンテキストヘルパー
+  */
+case class ScalikeContextHelper() extends IOContextHelper with ScalikeIOContextMixin {
+  /** ${inheritDoc} */
+  override def withReadOnlyContext[A](f: (IOContext) => A): A = {
+    DB readOnly { session =>
+      f(ScalikeIOContext(session))
+    }
+  }
+
+  /** ${inheritDoc} */
+  override def withTransactionContext[A](f: (IOContext) => A): A = {
+    DB localTx { session =>
+      f(ScalikeIOContext(session))
+    }
+  }
+}

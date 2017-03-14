@@ -5,18 +5,19 @@ import javax.inject._
 import play.api._
 import play.api.libs.json._
 import play.api.mvc._
-import exceptions.{JsonParseException, ResourceNotFoundException}
+
 import infrastructures.convert._
-import models.{User, UserId, UserRepository}
+import models.{User, UserRepository}
 import services.UserServiceFactory
-import shared.IOContext
+import shared.IOContextHelper
 
 
 @Singleton
 class UserController @Inject()(
   userRepository: UserRepository,
-  userServiceFactory: UserServiceFactory
-) extends TodoControllerBase(userRepository, InMemoryContextHelper)
+  userServiceFactory: UserServiceFactory,
+  contextHelper: IOContextHelper
+) extends TodoControllerBase(userRepository, contextHelper)
     with UserConverter {
 
   // ----------------------------------------------------------------------------------------------
@@ -30,7 +31,7 @@ class UserController @Inject()(
   private implicit val patchUserRequestReads = Json.reads[PatchUserRequest]
 
   def listUsers() = Action {
-    withContext { implicit context =>
+    withReadOnlyContext { implicit context =>
       val users = userRepository.findAll()
       Ok(JsObject(Map(
         "total" -> JsNumber(users.length),
@@ -40,7 +41,7 @@ class UserController @Inject()(
   }
 
   def addUser() = Action { request =>
-    withContext { implicit context =>
+    withTransactionContext { implicit context =>
       jsonAction[AddUserRequest](request, addUserRequestReads) { addUserRequest =>
         val service = userServiceFactory.create(userRepository)
         val user = service.createUser(addUserRequest.name)
@@ -50,13 +51,13 @@ class UserController @Inject()(
   }
 
   def getUser(id: Int) = Action {
-    withContext { implicit context =>
+    withReadOnlyContext { implicit context =>
       withUser(id) { user => Ok(Json.toJson(user)) }
     }
   }
 
   def patchUser(id: Int) = Action { request =>
-    withContext { implicit context =>
+    withTransactionContext { implicit context =>
       def applyPatch(user: User, patchUserRequest: PatchUserRequest): User = {
         def rename(name: Option[String]): User = name match {
           case Some(n) => user.rename(n)

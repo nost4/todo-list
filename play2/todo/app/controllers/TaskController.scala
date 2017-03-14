@@ -2,14 +2,16 @@ package controllers
 
 import javax.inject._
 
+import play.api.libs.json.Json
+import play.api.mvc._
+
+import org.joda.time.DateTime
+
 import exceptions.ResourceNotFoundException
 import infrastructures.convert.{DateTimeConverter, TaskConverter, UserConverter}
 import models._
-import org.joda.time.DateTime
-import play.api.libs.json.Json
-import play.api.mvc._
 import services.UserTaskServiceFactory
-import shared.IOContext
+import shared.{IOContext, IOContextHelper}
 
 
 @Singleton
@@ -17,8 +19,9 @@ class TaskController @Inject()(
   userRepository: UserRepository,
   taskRepository: TaskRepository,
   userTaskRepository: UserTaskRepository,
-  userTaskServiceFactory: UserTaskServiceFactory
-) extends TodoControllerBase(userRepository, InMemoryContextHelper)
+  userTaskServiceFactory: UserTaskServiceFactory,
+  contextHelper : IOContextHelper
+) extends TodoControllerBase(userRepository, contextHelper)
     with UserConverter with TaskConverter with DateTimeConverter {
 
   // ----------------------------------------------------------------------------------------------
@@ -55,7 +58,7 @@ class TaskController @Inject()(
   }
 
   def listUserTasks(userId: Int) = Action {
-    withContext { implicit context =>
+    withReadOnlyContext { implicit context =>
       withUser(userId) { user =>
         val userTaskService = userTaskServiceFactory.create(taskRepository, userTaskRepository)
         val userTasks = userTaskService.findTasks(user.id)
@@ -67,7 +70,7 @@ class TaskController @Inject()(
 
   def createUserTasks(userId: Int) = Action { request =>
     jsonAction[CreateUserTaskRequest](request, createUserTaskRequestReads) { requestData =>
-      withContext { implicit context =>
+      withTransactionContext { implicit context =>
         withUser(userId) { user =>
           val userTaskService = userTaskServiceFactory.create(taskRepository, userTaskRepository)
           val userTask = userTaskService.createNewTask(user, requestData.title, requestData.content, requestData.deadlineAt)
@@ -79,7 +82,7 @@ class TaskController @Inject()(
   }
 
   def getUserTask(userId: Int, taskId: Int) = Action {
-    withContext { implicit context =>
+    withReadOnlyContext { implicit context =>
       withUser(userId) { _ => // ユーザの存在確認でアクセスする
         withUserTask(UserId(userId), TaskId(taskId)) { task =>
           Ok(Json.toJson(task))
@@ -118,7 +121,7 @@ class TaskController @Inject()(
 
   def patchUserTask(userId: Int, taskId: Int) = Action { request =>
     jsonAction[PatchUserTaskRequest](request, patchUserTaskRequestReads) { requestData =>
-      withContext { implicit context =>
+      withTransactionContext { implicit context =>
         withUser(userId) { user =>
           withUserTask(user.id, TaskId(taskId)) { task =>
             val patchedTask = applyPatch(task, requestData)
@@ -132,7 +135,7 @@ class TaskController @Inject()(
   }
 
   def deleteUserTask(userId: Int, taskId: Int) = Action {
-    withContext { implicit context =>
+    withTransactionContext { implicit context =>
       withUser(userId) { user => // ユーザの存在確認でアクセスする
         withUserTask(user.id, TaskId(taskId)) { task =>  // タスクの存在確認でアクセスする
           val userTaskService = userTaskServiceFactory.create(taskRepository, userTaskRepository)
