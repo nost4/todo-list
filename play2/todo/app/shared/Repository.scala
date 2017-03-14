@@ -41,10 +41,12 @@ trait Repository[K, V] {
 
 /**
   * エンティティのリポジトリ
- *
+  *
+  * NOTE: traitのがよさそう、そのままだと変更できないのであとで調査すること
+  *
   * @tparam E エンティティの型
   */
-abstract class EntityRepository[E<: Entity] extends Repository[E#ID, E] {
+abstract class EntityRepository[E <: Entity] extends Repository[E#ID, E] {
 
   /**
     * エンティティを作成する
