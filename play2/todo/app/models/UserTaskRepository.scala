@@ -33,5 +33,5 @@ trait UserTaskRepository extends Repository[UserTaskRelation, UserTaskRelation] 
     * 指定したユーザとタスクの関連を削除する
     * @param userTaskRelation ユーザとタスクの関連
     */
-  def delete(userTaskRelation: UserTaskRelation)(implicit context: Context): Unit
+  def delete(userTaskRelation: UserTaskRelation)(implicit context: Context): Unit = remove(userTaskRelation)
 }

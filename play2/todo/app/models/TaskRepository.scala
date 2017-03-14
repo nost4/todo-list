@@ -15,5 +15,5 @@ trait TaskRepository extends EntityRepository[Task] {
   /**
     * 指定したタスク識別子のタスクを削除する
     */
-  def delete(taskId: TaskId)(implicit context: Context): Unit
+  def delete(taskId: TaskId)(implicit context: Context): Unit = remove(taskId)
 }
