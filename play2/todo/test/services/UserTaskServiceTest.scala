@@ -16,7 +16,7 @@ class UserTaskServiceTest extends PlaySpec with MockitoSugar {
   implicit val context = InMemoryIOContext
 
   "UserTaskService#assignTaskToUser" should {
-    "store user-task relationship into repository" in {
+    "create new user-task" in {
       val taskRepository = new InMemoryTaskRepository()
       val userTaskRepository = new InMemoryUserTaskRepository()
       val service = new UserTaskServiceImpl(taskRepository, userTaskRepository)
@@ -48,6 +48,60 @@ class UserTaskServiceTest extends PlaySpec with MockitoSugar {
       secondUserTask.task.deadlineAt mustBe Some(new DateTime(1, 1, 1, 0, 0 ,0))
       secondUserTask.task.completedAt mustBe None
       userTaskRepository.find(UserTaskRelation(UserId(1), TaskId(2))) mustBe Some(secondUserTask.relation)
+    }
+
+    "update user-task" in {
+      val taskRepository = new InMemoryTaskRepository()
+      val userTaskRepository = new InMemoryUserTaskRepository()
+      val service = new UserTaskServiceImpl(taskRepository, userTaskRepository)
+
+      val user = mockUser(UserId(1))
+      val userTask = service.createNewTask(user, "title", None, None)
+
+      taskRepository.find(userTask.task.id).map(_.title) mustBe Some("title")
+      taskRepository.find(userTask.task.id).flatMap(_.content) mustBe None
+      taskRepository.find(userTask.task.id).flatMap(_.deadlineAt) mustBe None
+
+      val updatedTask = userTask.task.withContent("content").withDeadline(new DateTime(2017, 3, 16, 0, 0, 0))
+      service.updateTask(userTask.user.id, updatedTask)
+
+      taskRepository.find(userTask.task.id).map(_.title) mustBe Some("title")
+      taskRepository.find(userTask.task.id).flatMap(_.content) mustBe Some("content")
+      taskRepository.find(userTask.task.id).flatMap(_.deadlineAt) mustBe Some(new DateTime(2017, 3, 16, 0, 0, 0))
+    }
+
+    "find user-tasks" in {
+      val taskRepository = new InMemoryTaskRepository()
+      val userTaskRepository = new InMemoryUserTaskRepository()
+      val service = new UserTaskServiceImpl(taskRepository, userTaskRepository)
+
+      val user = mockUser(UserId(1))
+
+      // タスク1
+      val firstUserTask = service.createNewTask(user, "title", Some("content"), None)
+      // タスク2
+      val secondUserTask = service.createNewTask(user, "task2", None, Some(new DateTime(1, 1, 1, 0, 0, 0)))
+
+      // ID指定で検索
+      val tasks = service.findTasks(UserId(1))
+      tasks.sortBy(_.id.value) mustBe List(firstUserTask, secondUserTask).map(_.task).sortBy(_.id.value)
+    }
+
+    "delete user-task" in {
+      val taskRepository = new InMemoryTaskRepository()
+      val userTaskRepository = new InMemoryUserTaskRepository()
+      val service = new UserTaskServiceImpl(taskRepository, userTaskRepository)
+
+      val user = mockUser(UserId(1))
+      val userTask = service.createNewTask(user, "title", None, None)
+
+      taskRepository.find(userTask.task.id) mustBe Some(userTask.task)
+      userTaskRepository.find(userTask.relation) mustBe Some(userTask.relation)
+
+      service.deleteTask(userTask.user.id, userTask.task.id)
+
+      taskRepository.find(userTask.task.id) mustBe None
+      userTaskRepository.find(userTask.relation) mustBe None
     }
   }
 }
